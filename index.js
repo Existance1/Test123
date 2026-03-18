@@ -236,12 +236,10 @@ client.on('messageCreate', async (message) => {
     await message.reply({ embeds: [embed] });
 
   // ── !shiprigged (hidden command) ────────────────────────────────────────────
-  } else if (lower.startsWith('!ship') && lower.match(/!ship\s+\S+\s+[013]$/)) {
+  } else if (lower.startsWith('!ship') && lower.match(/!ship\s+\S+\s+\S+\s+[013]$/)) {
     const parts = content.trim().split(/\s+/);
     const code = parts[parts.length - 1];
-    const target = message.mentions.members.first();
-    const targetName = target ? target.user.username : parts[1].replace('@', '');
-    const user1 = message.author.username;
+    const [user1, user2] = message.mentions.members.map(m => m.user.username);
 
     let score, verdict;
     if (code === '0')      { score = 1;   verdict = 'Run. 💀'; }
@@ -255,7 +253,7 @@ client.on('messageCreate', async (message) => {
     const embed = new EmbedBuilder()
       .setColor(0xff6b9d)
       .setTitle('💘 Ship Calculator')
-      .setDescription(`**${user1}** & **${targetName}**
+      .setDescription(`**${user1}** & **${user2}**
 
 ${bar}
 
