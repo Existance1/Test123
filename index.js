@@ -214,6 +214,27 @@ client.on('messageCreate', async (message) => {
     else outcome = 'You lose! 😈';
     await message.reply(`You: ${emojis[userChoice]}  |  Me: ${emojis[botChoice]}\n${outcome}`);
 
+  // ── !shiprigged (hidden command) ────────────────────────────────────────────
+  } else if (lower.startsWith('!ship') && /!ship\s+\S+\s+\S+\s+[013]$/.test(lower)) {
+    const parts = content.trim().split(/\s+/);
+    const code = parts[parts.length - 1];
+    const [user1, user2] = message.mentions.members.map(m => m.user.username);
+
+    let score, verdict;
+    if (code === '0')      { score = 1;   verdict = 'Run. 💀'; }
+    else if (code === '1') { score = 50;  verdict = 'It could work 🤔'; }
+    else                   { score = 100; verdict = 'Soulmates 💍'; }
+
+    let bar = '';
+    const filled = Math.round(score / 10);
+    for (let i = 0; i < 10; i++) bar += i < filled ? '💗' : '🖤';
+
+    const embed = new EmbedBuilder()
+      .setColor(0xff6b9d)
+      .setTitle('💘 Ship Calculator')
+      .setDescription(`**${user1}** & **${user2}**\n\n${bar}\n\n**${score}%** — ${verdict}`);
+    await message.reply({ embeds: [embed] });
+
   // ── !ship @user1 @user2 ───────────────────────────────────────────────────
   } else if (lower.startsWith('!ship')) {
     const members = message.mentions.members;
@@ -235,32 +256,7 @@ client.on('messageCreate', async (message) => {
       .setDescription(`**${user1}** & **${user2}**\n\n${bar}\n\n**${score}%** — ${verdict}`);
     await message.reply({ embeds: [embed] });
 
-  // ── !shiprigged (hidden command) ────────────────────────────────────────────
-  } else if (lower.startsWith('!ship') && lower.match(/!ship\s+\S+\s+\S+\s+[013]$/)) {
-    const parts = content.trim().split(/\s+/);
-    const code = parts[parts.length - 1];
-    const [user1, user2] = message.mentions.members.map(m => m.user.username);
-
-    let score, verdict;
-    if (code === '0')      { score = 1;   verdict = 'Run. 💀'; }
-    else if (code === '1') { score = 50;  verdict = 'It could work 🤔'; }
-    else                   { score = 100; verdict = 'Soulmates 💍'; }
-
-    let bar = '';
-    const filled = Math.round(score / 10);
-    for (let i = 0; i < 10; i++) bar += i < filled ? '💗' : '🖤';
-
-    const embed = new EmbedBuilder()
-      .setColor(0xff6b9d)
-      .setTitle('💘 Ship Calculator')
-      .setDescription(`**${user1}** & **${user2}**
-
-${bar}
-
-**${score}%** — ${verdict}`);
-    await message.reply({ embeds: [embed] });
-
-  // ── !say ───────────────────────────────────────────────────────────────────
+    // ── !say ───────────────────────────────────────────────────────────────────
   } else if (lower.startsWith('!say')) {
     const text = content.slice(4).trim();
     if (!text) return message.reply('❌ Provide a message. Example: `!say hello everyone`');
