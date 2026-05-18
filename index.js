@@ -5,7 +5,7 @@ const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
 const fs = require('fs');
 
-const DATA_FILE = '/app/data/data.json';
+const DATA_FILE = './data.json';
 
 // Load persisted data or start fresh
 function loadData() {
@@ -100,6 +100,41 @@ const TRIVIA = [
   { q: 'How many Pokemon were in the original Gen 1 Pokedex?', a: '151' },
   { q: 'What game features a character named Master Chief?', a: 'halo' },
   { q: 'In Minecraft, what do you use to make a bed?', a: 'wool and wood' },
+  // Sports
+  { q: 'How many players are on a standard soccer team?', a: '11' },
+  { q: 'How many rings are on the Olympic flag?', a: '5' },
+  { q: 'What sport is played at Wimbledon?', a: 'tennis' },
+  { q: 'How many points is a touchdown worth in American football?', a: '6' },
+  { q: 'What country invented basketball?', a: 'canada' },
+  { q: 'How many players are on a basketball team on the court at one time?', a: '5' },
+  { q: 'What is the maximum score in ten pin bowling?', a: '300' },
+  { q: 'In what sport would you perform a slam dunk?', a: 'basketball' },
+  // Pop culture
+  { q: 'What is the name of the fictional kingdom in Frozen?', a: 'arendelle' },
+  { q: 'What band was Harry Styles in before going solo?', a: 'one direction' },
+  { q: 'How many infinity stones are there in the MCU?', a: '6' },
+  { q: 'What is the name of Thor\'s hammer?', a: 'mjolnir' },
+  { q: 'What streaming service is known for the show Stranger Things?', a: 'netflix' },
+  { q: 'What color is Pikachu?', a: 'yellow' },
+  { q: 'What is the name of Simba\'s father in The Lion King?', a: 'mufasa' },
+  { q: 'What TV show features the characters Dwight Schrute and Michael Scott?', a: 'the office' },
+  // Technology
+  { q: 'What does CPU stand for?', a: 'central processing unit' },
+  { q: 'What does HTTP stand for?', a: 'hypertext transfer protocol' },
+  { q: 'What company makes the iPhone?', a: 'apple' },
+  { q: 'What programming language is known for its snake logo?', a: 'python' },
+  { q: 'What does RAM stand for?', a: 'random access memory' },
+  { q: 'What social media platform uses a bird as its logo?', a: 'twitter' },
+  { q: 'What does USB stand for?', a: 'universal serial bus' },
+  // Random fun
+  { q: 'How many seconds are in an hour?', a: '3600' },
+  { q: 'What is the most popular card game in the world?', a: 'poker' },
+  { q: 'What is the fear of spiders called?', a: 'arachnophobia' },
+  { q: 'How many days are in a leap year?', a: '366' },
+  { q: 'What is the most consumed beverage in the world after water?', a: 'tea' },
+  { q: 'What is the longest word in the English language?', a: 'pneumonoultramicroscopicsilicovolcanoconiosis' },
+  { q: 'How many zeros are in one million?', a: '6' },
+  { q: 'What planet has the most moons?', a: 'saturn' },
 ];
 
 const SCRAMBLE_WORDS = [
@@ -112,6 +147,60 @@ const SCRAMBLE_WORDS = [
   'honeybee', 'igloo', 'jellyfish', 'kangaroo', 'lollipop', 'mushroom', 'narwhal',
 ];
 
+
+const WYR = [
+  'Would you rather fight 1 horse-sized duck or 100 duck-sized horses?',
+  'Would you rather never use the internet again or never watch TV/movies again?',
+  'Would you rather always be 10 minutes late or always be 20 minutes early?',
+  'Would you rather have unlimited money or unlimited free time?',
+  'Would you rather lose all your memories or never be able to make new ones?',
+  'Would you rather be able to fly or be invisible?',
+  'Would you rather always have to say what you\'re thinking or never speak again?',
+  'Would you rather live in the past or the future?',
+  'Would you rather be the funniest person in the room or the smartest?',
+  'Would you rather never sleep again or never eat food again?',
+  'Would you rather have free Wi-Fi everywhere or free food anywhere?',
+  'Would you rather know how you die or when you die?',
+  'Would you rather give up social media or give up music?',
+  'Would you rather be famous but hated or unknown but loved?',
+  'Would you rather only be able to whisper or only be able to shout?',
+  'Would you rather always be cold or always be hot?',
+  'Would you rather be able to talk to animals or speak every language?',
+  'Would you rather have no fingers or no toes?',
+  'Would you rather always win arguments or always win at games?',
+  'Would you rather be 2 inches tall or 20 feet tall?',
+  'Would you rather have a pause button or a rewind button for your life?',
+  'Would you rather eat pizza every day or never eat pizza again?',
+  'Would you rather be the first person on Mars or the richest person on Earth?',
+  'Would you rather have hiccups for the rest of your life or always feel like you need to sneeze?',
+  'Would you rather only be able to watch one TV show forever or never watch TV again?',
+  // Round 2
+  'Would you rather have the ability to read minds or see the future?',
+  'Would you rather always have to sing instead of speak or dance everywhere you go?',
+  'Would you rather lose your sense of taste or your sense of smell?',
+  'Would you rather be stuck on a deserted island alone or with someone you hate?',
+  'Would you rather have a photographic memory or be able to forget anything on demand?',
+  'Would you rather only eat sweet food or only eat savory food forever?',
+  'Would you rather be able to breathe underwater or survive in space?',
+  'Would you rather have legs as long as your fingers or fingers as long as your legs?',
+  'Would you rather be the best player on a losing team or the worst player on a winning team?',
+  'Would you rather have unlimited battery on all your devices or never get sick again?',
+  'Would you rather live without music or live without movies?',
+  'Would you rather be able to teleport anywhere or time travel to the future only?',
+  'Would you rather always have to wear a costume or never be allowed to wear a costume again?',
+  'Would you rather find true love or win the lottery?',
+  'Would you rather speak every language or play every instrument?',
+  'Would you rather be feared or be loved?',
+  'Would you rather have a talking dog or a talking cat?',
+  'Would you rather be able to stop time or slow it down by half?',
+  'Would you rather have free plane tickets anywhere forever or free food at every restaurant forever?',
+  'Would you rather never age physically or never age mentally?',
+  'Would you rather always know when someone is lying or be the perfect liar?',
+  'Would you rather have everyone laugh at your jokes or always win every game you play?',
+  'Would you rather give up your phone for a month or give up showering for a month?',
+  'Would you rather only be able to eat one meal a day or have to eat every hour?',
+  'Would you rather have a rewind button or a fast forward button for life?',
+];
 function scrambleWord(word) {
   const arr = word.split('');
   for (let i = arr.length - 1; i > 0; i--) {
@@ -390,6 +479,51 @@ client.on('messageCreate', async (message) => {
     connection.destroy();
     await message.reply('👋 Left the voice channel!');
 
+  // ── !wyr ───────────────────────────────────────────────────────────────────────────
+  } else if (lower === '!wyr') {
+    const question = WYR[Math.floor(Math.random() * WYR.length)];
+    const embed = new EmbedBuilder()
+      .setColor(0xa855f7)
+      .setTitle('🤔 Would You Rather...')
+      .setDescription(question)
+      .setFooter({ text: 'React with 🇦 or 🇧 to vote!' });
+    const wyrMsg = await message.channel.send({ embeds: [embed] });
+    await wyrMsg.react('🇦');
+    await wyrMsg.react('🇧');
+
+  // ── !remind (time) (message) ────────────────────────────────────────────────
+  } else if (lower.startsWith('!remind')) {
+    const parts = content.slice(7).trim().split(' ');
+    const timeStr = parts[0].toLowerCase();
+    const reminderText = parts.slice(1).join(' ');
+    let seconds;
+    let label;
+    if (timeStr.endsWith('h')) {
+      const h = parseFloat(timeStr);
+      seconds = Math.round(h * 3600);
+      label = `${h} hour${h === 1 ? '' : 's'}`;
+    } else if (timeStr.endsWith('m')) {
+      const m = parseFloat(timeStr);
+      seconds = Math.round(m * 60);
+      label = `${m} minute${m === 1 ? '' : 's'}`;
+    } else if (timeStr.endsWith('s')) {
+      seconds = parseInt(timeStr);
+      label = `${seconds} second${seconds === 1 ? '' : 's'}`;
+    } else {
+      seconds = parseInt(timeStr);
+      label = `${seconds} second${seconds === 1 ? '' : 's'}`;
+    }
+    if (isNaN(seconds) || seconds < 1 || seconds > 86400) {
+      return message.reply('❌ Usage: `!remind (time) (message)` — e.g. `!remind 30s`, `!remind 5m`, `!remind 2h` (max 24h)');
+    }
+    if (!reminderText) {
+      return message.reply('❌ Please include a reminder message. Example: `!remind 5m take out the trash`');
+    }
+    await message.reply('⏰ Got it! I\'ll remind you in **' + label + '**!');
+    setTimeout(async () => {
+      await message.channel.send(`⏰ ${message.author} reminder: **${reminderText}**`);
+    }, seconds * 1000);
+
   // ── !help ──────────────────────────────────────────────────────────────────
   } else if (lower === '!help') {
     const embed = new EmbedBuilder()
@@ -408,6 +542,8 @@ client.on('messageCreate', async (message) => {
         { name: '!countdown (1-10)', value: 'Counts down to GO!' },
         { name: '!trivia', value: 'Asks a trivia question — first to answer wins!' },
         { name: '!scramble', value: 'Unscramble a word — first to answer wins!' },
+        { name: '!wyr', value: 'Sends a random Would You Rather question' },
+        { name: '!remind (time) (message)', value: 'Pings you after a set time — use s/m/h e.g. `!remind 5m hi`' },
         { name: '!join', value: 'Joins your voice channel (deafened)' },
         { name: '!leave', value: 'Leaves the voice channel' },
         { name: '!help', value: 'Shows this list' },
