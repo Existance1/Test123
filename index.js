@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
 
 const CHEESEBURGER_GIF = 'https://tenor.com/view/dodge-matrix-charborg-gif-14001012220497599567';
 const LOSER_GIF = 'https://tenor.com/view/niko-oneshot-ballin-teste-niko-ballin-gif-26110464';
@@ -111,6 +112,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
@@ -325,6 +327,31 @@ client.on('messageCreate', async (message) => {
       if (reason !== 'answered') await message.channel.send(`⏰ Time's up! The word was **${word}**.`);
     });
 
+  // ── !join ──────────────────────────────────────────────────────────────────
+  } else if (lower === '!join') {
+    const voiceChannel = message.member.voice.channel;
+    if (!voiceChannel) {
+      return message.reply('❌ You need to be in a voice channel first!');
+    }
+    joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: message.guild.id,
+      adapterCreator: message.guild.voiceAdapterCreator,
+      selfDeaf: true,
+      selfMute: true,
+    });
+    await message.reply(`🔇 Joined **${voiceChannel.name}** (deafened)`);
+
+  // ── !leave ─────────────────────────────────────────────────────────────────
+  } else if (lower === '!leave') {
+    const { getVoiceConnection } = require('@discordjs/voice');
+    const connection = getVoiceConnection(message.guild.id);
+    if (!connection) {
+      return message.reply('❌ I\'m not in a voice channel!');
+    }
+    connection.destroy();
+    await message.reply('👋 Left the voice channel!');
+
   // ── !help ──────────────────────────────────────────────────────────────────
   } else if (lower === '!help') {
     const embed = new EmbedBuilder()
@@ -343,6 +370,8 @@ client.on('messageCreate', async (message) => {
         { name: '!countdown (1-10)', value: 'Counts down to GO!' },
         { name: '!trivia', value: 'Asks a trivia question — first to answer wins!' },
         { name: '!scramble', value: 'Unscramble a word — first to answer wins!' },
+        { name: '!join', value: 'Joins your voice channel (deafened)' },
+        { name: '!leave', value: 'Leaves the voice channel' },
         { name: '!help', value: 'Shows this list' },
       );
     await message.reply({ embeds: [embed] });
