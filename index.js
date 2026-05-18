@@ -3,6 +3,24 @@ require('dotenv').config();
 
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
+const fs = require('fs');
+
+const DATA_FILE = './data.json';
+
+// Load persisted data or start fresh
+function loadData() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+  } catch {
+    return {};
+  }
+}
+
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+const persistedData = loadData();
 
 const CHEESEBURGER_GIF = 'https://tenor.com/view/dodge-matrix-charborg-gif-14001012220497599567';
 const LOSER_GIF = 'https://tenor.com/view/niko-oneshot-ballin-teste-niko-ballin-gif-26110464';
@@ -106,6 +124,8 @@ function scrambleWord(word) {
 
 const activeSessions = new Map();
 const cheeseburgerIntervals = new Map();
+// Stores required role ID per guild for !cheeseburger (null = no restriction)
+const cheeseburgerRoles = new Map(Object.entries(persistedData));
 
 const client = new Client({
   intents: [
@@ -128,6 +148,11 @@ client.on('messageCreate', async (message) => {
 
   // ── !cheeseburger ──────────────────────────────────────────────────────────
   if (lower === '!cheeseburger') {
+    const requiredRoleId = cheeseburgerRoles.get(message.guild.id);
+    if (requiredRoleId && !message.member.roles.cache.has(requiredRoleId)) {
+      await message.react('❌');
+      return;
+    }
     if (cheeseburgerIntervals.has(message.channel.id)) {
       return message.reply('Already spamming! Use `!burgernocheese` to stop.');
     }
@@ -160,6 +185,19 @@ client.on('messageCreate', async (message) => {
 
     const timeout = setTimeout(sendBurst, delay);
     cheeseburgerIntervals.set(message.channel.id, timeout);
+
+  // ── !set @role ────────────────────────────────────────────────────────────
+  } else if (lower.startsWith('!set')) {
+    if (!message.member.permissions.has('Administrator')) {
+      return message.reply('❌ Only admins can set the cheeseburger role!');
+    }
+    const role = message.mentions.roles.first();
+    if (!role) {
+      return message.reply('❌ Mention a role. Example: `!set @role`');
+    }
+    cheeseburgerRoles.set(message.guild.id, role.id);
+    saveData(Object.fromEntries(cheeseburgerRoles));
+    await message.reply(`✅ Only members with **${role.name}** can now use \`!cheeseburger\`!`);
 
   // ── !burgernocheese ────────────────────────────────────────────────────────
   } else if (lower === '!burgernocheese') {
