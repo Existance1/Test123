@@ -5,7 +5,7 @@ const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
 const fs = require('fs');
 
-const DATA_FILE = './data.json';
+const DATA_FILE = '/app/data/data.json';
 
 // Load persisted data or start fresh
 function loadData() {
